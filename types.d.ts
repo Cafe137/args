@@ -1,4 +1,4 @@
-declare module 'cafe-argv' {
+declare module 'cafe-args' {
     export interface Argument {
         key: string
         description: string
