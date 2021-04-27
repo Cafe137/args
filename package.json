@@ -1,0 +1,23 @@
+{
+    "name": "cafe-args",
+    "version": "1.0.0",
+    "exports": {
+        ".": {
+            "require": "./index.js",
+            "default": "./module.mjs"
+        }
+    },
+    "main": "index.js",
+    "types": "types.d.ts",
+    "scripts": {
+        "test": "jest",
+        "test:coverage": "jest --coverage"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/jest": "^26.0.22",
+        "jest": "^26.6.3"
+    }
+}

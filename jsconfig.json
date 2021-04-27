@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "lib": ["esnext"],
+        "moduleResolution": "node",
+        "module": "esnext",
+        "target": "esnext",
+        "checkJs": true
+    },
+    "include": ["index.js", "src/**/*.js"],
+    "typeAcquisition": {
+        "include": ["jest"]
+    }
+}
