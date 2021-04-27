@@ -23,14 +23,35 @@ function findCommandByFullPath(groups, commands, fullPath) {
     return items.find(item => item.fullPath === fullPath)
 }
 
-function findGroupAndCommand(argv, groups, commands) {
-    const rootIndex = argv.findIndex(item => !isOption(item))
-    const group = groups.find(group => group.key === argv[rootIndex])
-    const commandIndex = group ? argv.findIndex((item, i) => i > rootIndex && !isOption(item)) : rootIndex
-    const command = (group ? group.commands : commands).find(
-        command => command.key === argv[commandIndex] || (command.alias && command.alias === argv[commandIndex])
-    )
-    return { group, command }
+function arrayBeginsWith(array, text) {
+    const words = text.split(' ')
+    if (words.length > array.length) {
+        return false
+    }
+    for (let i = 0; i < words.length; i++) {
+        if (array[i] !== words[i]) {
+            return false
+        }
+    }
+    return true
+}
+
+function findGroupAndCommand(argv, groups, commands, group) {
+    const groupPath = group ? group.fullPath + ' ' : ''
+    for (const command of commands) {
+        if (arrayBeginsWith(argv, groupPath + command.key) || (command.alias && arrayBeginsWith(argv, groupPath + command.alias))) {
+            return { group, command }
+        }
+    }
+    for (const group of groups) {
+        if (arrayBeginsWith(argv, group.fullPath)) {
+            const result = findGroupAndCommand(argv, group.groups, group.commands, group)
+            if (result.group) {
+                return { group: result.group, command: result.command }
+            }
+        }
+    }
+    return { group }
 }
 
 module.exports = { isOption, findOption, findLongOption, findGroupAndCommand, isOptionPassed, findCommandByFullPath }

@@ -101,7 +101,7 @@ function createParser(options) {
                 printCommandUsage(printer, context.command, options, commandArguments)
                 return { exitReason: 'help' }
             }
-            const skipAmount = context.group ? 2 : 1
+            const skipAmount = context.command.depth + 1
             for (let i = skipAmount; i < argv.length; i++) {
                 const current = argv[i]
                 const next = argv[i + 1]

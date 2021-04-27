@@ -58,6 +58,7 @@ declare module 'cafe-args' {
     export class Group {
         constructor(name: string, description: string)
         withCommand(command: Command): Group
+        withGroup(group: Group): Group
     }
 
     export interface Parser {
