@@ -2,10 +2,10 @@ declare module 'cafe-args' {
     export interface Argument {
         key: string
         description: string
-        type?: 'number' | 'bigint' | 'string' | 'boolean'
+        type?: string
         required?: boolean
         conflicts?: string
-        default?: string | boolean | number | bigint
+        default?: unknown
         defaultDescription?: string
         alias?: string
         envKey?: string
