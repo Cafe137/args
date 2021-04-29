@@ -11,7 +11,7 @@ function findOption(options, string) {
 }
 
 function isOption(string) {
-    return string.startsWith('-')
+    return string.startsWith('-') && !/^-\d+$/.test(string)
 }
 
 function isOptionPassed(argv, option) {
