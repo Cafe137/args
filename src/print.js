@@ -150,7 +150,7 @@ function printCommandUsage(printer, command, options, commandArguments) {
         printer.print('')
     }
     maybePrintOptionFamily(printer, 'Required Options', requiredOptions)
-    maybePrintOptionFamily(printer, 'Optional Options', optionalOptions)
+    maybePrintOptionFamily(printer, 'Options', optionalOptions)
     maybePrintOptionFamily(printer, 'Global Options', globalOptions)
 }
 
