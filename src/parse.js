@@ -1,6 +1,11 @@
 function parseValue(option, rawValue) {
     const { key, type } = option
     if (type === 'boolean') {
+        if (rawValue === 'true') {
+            return { value: true, skip: 1 }
+        } else if (rawValue === 'false') {
+            return { value: false, skip: 1 }
+        }
         return { value: true, skip: 0 }
     } else if (type === 'number') {
         const value = parseInt(rawValue, 10)
