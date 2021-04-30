@@ -60,7 +60,8 @@ function createParser(options) {
         parse: argv => {
             const context = {
                 options: {},
-                arguments: {}
+                arguments: {},
+                sourcemap: {}
             }
             const findResult = findGroupAndCommand(argv, groups, commands)
             context.group = findResult.group
@@ -120,6 +121,7 @@ function createParser(options) {
                             return handleError(context, 'Option passed more than once: ' + option.key)
                         }
                         target[option.key] = parseResult.value
+                        context.sourcemap[option.key] = 'explicit'
                     }
                     i += parseResult.skip
                 } else {
@@ -136,6 +138,7 @@ function createParser(options) {
                         return handleError(context, parseResult.message)
                     }
                     target[argument.key] = parseResult.value
+                    context.sourcemap[argument.key] = 'explicit'
                 }
             }
             for (const option of options) {
@@ -155,6 +158,7 @@ function createParser(options) {
                         continue
                     }
                     target[option.key] = parseResult.value
+                    context.sourcemap[option.key] = 'env'
                 }
             }
             const commandArgument = context.command.arguments.length ? context.command.arguments[0] : null
@@ -162,6 +166,7 @@ function createParser(options) {
             if (commandArgument && context.arguments[commandArgument.key] === undefined) {
                 if (commandArgument.default !== undefined) {
                     context.arguments[commandArgument.key] = commandArgument.default
+                    context.sourcemap[commandArgument.key] = 'default'
                 } else if (commandArgument.required) {
                     return handleError(context, `Required argument [${commandArgument.key}] is not provided`)
                 }
@@ -169,6 +174,7 @@ function createParser(options) {
             if (siblingArgument && context.sibling.arguments[siblingArgument.key] === undefined) {
                 if (siblingArgument.default !== undefined) {
                     context.sibling.arguments[siblingArgument.key] = siblingArgument.default
+                    context.sourcemap[siblingArgument.key] = 'default'
                 } else if (siblingArgument.required) {
                     return handleError(context, `Required argument [${siblingArgument.key}] is not provided`)
                 }
@@ -184,6 +190,7 @@ function createParser(options) {
                             continue
                         }
                         target[option.key] = option.default
+                        context.sourcemap[option.key] = 'default'
                     }
                 }
                 if (option.required && !context.options[option.key] && (!option.conflicts || !context.options[option.conflicts])) {

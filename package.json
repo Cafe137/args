@@ -1,6 +1,6 @@
 {
     "name": "cafe-args",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "exports": {
         ".": {
             "require": "./index.js",

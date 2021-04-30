@@ -39,6 +39,7 @@ declare module 'cafe-args' {
         sibling?: ParsedCommand
         options: Record<string, unknown>
         arguments: Record<string, unknown>
+        sourcemap: Record<string, 'default' | 'env' | 'explicit'>
     }
 
     export class Command {
