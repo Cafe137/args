@@ -23,5 +23,5 @@ it('should handle -V specially', () => {
 
 it('should not handle -v', () => {
     const context = parser.parse(['-v'])
-    expect(context).toBe('No group or command specified')
+    expect(context).toBe('Not a valid group or command: -v')
 })

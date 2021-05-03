@@ -62,6 +62,13 @@ declare module 'cafe-args' {
         withGroup(group: Group): Group
     }
 
+    export interface Application {
+        name: string
+        command: string
+        version: string
+        description: string
+    }
+
     export interface Parser {
         parse(argv: string[]): Context
         addGroup(group: Group): void
@@ -69,12 +76,18 @@ declare module 'cafe-args' {
         addGlobalOption(option: Argument): void
     }
 
-    export function createParser(options?: { printer?: Printer }): Parser
+    export interface ParserOptions {
+        printer?: Printer
+        application?: Application
+    }
+
+    export function createParser(options?: ParserOptions): Parser
 
     export interface Printer {
         print(text: string): void
         printError(text: string): void
         printHeading(text: string): void
+        formatDim(text: string): string
         formatImportant(text: string): string
     }
 }

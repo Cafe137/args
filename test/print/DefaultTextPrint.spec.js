@@ -11,8 +11,8 @@ parser.addCommand(
 it('should print custom default text', () => {
     parser.parse(['2hex'])
     const calls = process.stdout.write.mock.calls
-    expect(calls[10][0]).toContain('--bytes-1')
-    expect(calls[10][0]).toContain('default: 00000000000000000000000000000000')
-    expect(calls[11][0]).toContain('--bytes-2')
-    expect(calls[11][0]).toContain('default: 0x00 ** 32')
+    expect(calls[14][0]).toContain('--bytes-1')
+    expect(calls[14][0]).toContain('default: 00000000000000000000000000000000')
+    expect(calls[15][0]).toContain('--bytes-2')
+    expect(calls[15][0]).toContain('default: 0x00 ** 32')
 })

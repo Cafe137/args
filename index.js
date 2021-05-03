@@ -1,6 +1,15 @@
 const { isOption, findGroupAndCommand, findOption, isOptionPassed, findCommandByFullPath, findLongOption } = require('./src/argv')
 const { parseValue } = require('./src/parse')
-const { printCommandUsage, printGroups, printCommands, maybePrintOptionFamily, createDefaultPrinter } = require('./src/print')
+const {
+    printCommandUsage,
+    printGroups,
+    printCommands,
+    maybePrintOptionFamily,
+    createDefaultPrinter,
+    createDefaultApplication,
+    getHeadlineMessage,
+    printGroup
+} = require('./src/print')
 const { Group, Command } = require('./src/type')
 
 function findOptionTargets(context, option) {
@@ -20,25 +29,32 @@ function findOptionTargets(context, option) {
 
 function createParser(options) {
     const printer = (options && options.printer) || createDefaultPrinter()
+    const application = (options && options.application) || createDefaultApplication()
     const groups = []
     const commands = []
     const globalOptions = []
-    const handleError = (context, reason) => {
+    const handleError = (context, reason, silent) => {
         if (!context.group && !context.command) {
-            printGroups(printer, groups)
-            printCommands(printer, commands)
+            printer.print(printer.formatDim(getHeadlineMessage(application)))
+            printer.print('')
+            printGroups(printer, application, groups)
+            printCommands(printer, application, commands)
             maybePrintOptionFamily(printer, 'Global Options', globalOptions)
         } else if (!context.command) {
-            printCommands(printer, context.group.commands)
+            printer.printHeading('Current Group:')
+            printer.print('')
+            printGroup(printer, context.group, context.group.fullPath.length)
+            printer.print('')
+            printCommands(printer, application, context.group.commands)
             maybePrintOptionFamily(printer, 'Global Options', globalOptions)
         } else {
             const siblingOptions = context.sibling ? context.sibling.command.options : []
             const options = [...globalOptions, ...context.command.options, ...siblingOptions]
             const siblingArguments = context.sibling ? context.sibling.command.arguments : []
             const commandArguments = [...context.command.arguments, ...siblingArguments]
-            printCommandUsage(printer, context.command, options, commandArguments)
+            printCommandUsage(printer, application, context.command, options, commandArguments)
         }
-        if (!context.options.help) {
+        if (!context.options.help && !silent) {
             printer.printHeading('Command failed with reason:')
             printer.print('')
             printer.printError(reason)
@@ -78,10 +94,19 @@ function createParser(options) {
                 }
             }
             if (!context.group && !context.command) {
-                return handleError(context, 'No group or command specified')
+                if (argv.join(' ') === '') {
+                    return handleError(context, 'No group or command specified', true)
+                } else {
+                    return handleError(context, 'Not a valid group or command: ' + argv[0])
+                }
             }
             if (context.group && !context.command) {
-                return handleError(context, `You need to specify a command in group [${context.group.key}]`)
+                if (argv.join(' ') === context.group.fullPath) {
+                    return handleError(context, `You need to specify a command in group [${context.group.key}]`, true)
+                } else {
+                    const depth = context.group.fullPath.split(' ').length
+                    return handleError(context, 'Not a valid command in group [' + context.group.key + ']: ' + argv[depth])
+                }
             }
             const sibling = context.command.sibling ? findCommandByFullPath(groups, commands, context.command.sibling) : null
             if (context.command.sibling && !sibling) {
@@ -99,7 +124,7 @@ function createParser(options) {
             const siblingArguments = sibling ? sibling.arguments : []
             const commandArguments = [...context.command.arguments, ...siblingArguments]
             if (context.options.help) {
-                printCommandUsage(printer, context.command, options, commandArguments)
+                printCommandUsage(printer, application, context.command, options, commandArguments)
                 return { exitReason: 'help' }
             }
             const skipAmount = context.command.depth + 1
@@ -168,7 +193,8 @@ function createParser(options) {
                     context.arguments[commandArgument.key] = commandArgument.default
                     context.sourcemap[commandArgument.key] = 'default'
                 } else if (commandArgument.required) {
-                    return handleError(context, `Required argument [${commandArgument.key}] is not provided`)
+                    const silent = argv.join(' ') === context.command.fullPath
+                    return handleError(context, `Required argument [${commandArgument.key}] is not provided`, silent)
                 }
             }
             if (siblingArgument && context.sibling.arguments[siblingArgument.key] === undefined) {
@@ -176,7 +202,8 @@ function createParser(options) {
                     context.sibling.arguments[siblingArgument.key] = siblingArgument.default
                     context.sourcemap[siblingArgument.key] = 'default'
                 } else if (siblingArgument.required) {
-                    return handleError(context, `Required argument [${siblingArgument.key}] is not provided`)
+                    const silent = argv.join(' ') === context.command.fullPath
+                    return handleError(context, `Required argument [${siblingArgument.key}] is not provided`, silent)
                 }
             }
             for (const option of options) {

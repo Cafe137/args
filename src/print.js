@@ -1,11 +1,39 @@
 const BOLD = '\x1b[1m'
+const DIM = '\x1b[2m'
 const WHITE = '\x1b[37m'
 const RED_BACKGROUND = '\x1b[41m'
 const RESET = '\x1b[0m'
-
 const EXTRA_SPACE = 3
 
+function createDefaultApplication() {
+    return {
+        name: 'Node.js CLI',
+        command: 'node',
+        version: '1.0.0',
+        description: 'Powered by open source technologies'
+    }
+}
+
+function getHeadlineMessage(application) {
+    return application.name + ' ' + application.version + ' - ' + application.description
+}
+
+function getGroupInfoMessage(application) {
+    return "Run '" + application.command + " GROUP --help' to see available commands in a group"
+}
+
+function getCommandInfoMessage(application) {
+    return "Run '" + application.command + " COMMAND --help' for more information on a command"
+}
+
 function createDefaultPrinter() {
+    function formatDim(string) {
+        if (process.stdout.isTTY) {
+            return DIM + string + RESET
+        }
+        return string
+    }
+
     function formatImportant(string) {
         if (process.stdout.isTTY) {
             return BOLD + string + RESET
@@ -36,6 +64,7 @@ function createDefaultPrinter() {
         print,
         printError,
         printHeading,
+        formatDim,
         formatImportant
     }
 }
@@ -56,14 +85,16 @@ function printCommand(printer, command, padLength) {
     }
 }
 
-function printCommands(printer, commands) {
+function printCommands(printer, application, commands) {
     if (commands.length) {
         const longest = getLongestKey(commands)
-        printer.printHeading('Available commands:')
+        printer.printHeading('Available Commands:')
         printer.print('')
         for (const command of commands) {
             printCommand(printer, command, longest)
         }
+        printer.print('')
+        printer.print(printer.formatDim(getCommandInfoMessage(application)))
         printer.print('')
     }
 }
@@ -72,14 +103,16 @@ function printGroup(printer, group, padLength) {
     printer.print(printer.formatImportant(group.key.padEnd(padLength + EXTRA_SPACE)) + group.description)
 }
 
-function printGroups(printer, groups) {
+function printGroups(printer, application, groups) {
     if (groups.length) {
         const longest = getLongestKey(groups)
-        printer.printHeading('Available groups:')
+        printer.printHeading('Available Groups:')
         printer.print('')
         for (const group of groups) {
             printGroup(printer, group, longest)
         }
+        printer.print('')
+        printer.print(printer.formatDim(getGroupInfoMessage(application)))
         printer.print('')
     }
 }
@@ -133,13 +166,24 @@ function maybePrintOptionFamily(printer, heading, items) {
     }
 }
 
-function printCommandUsage(printer, command, options, commandArguments) {
+function getArgumentStringForCommandUsage(command, commandArguments) {
+    if (!commandArguments.length) {
+        return ' '
+    }
+    return ' <' + commandArguments[0].key + '> '
+}
+
+function printCommandUsage(printer, application, command, options, commandArguments) {
     const requiredOptions = options.filter(option => !option.global && option.required)
     const optionalOptions = options.filter(option => !option.global && !option.required)
     const globalOptions = options.filter(option => option.global)
     printer.printHeading('Current Command:')
     printer.print('')
     printCommand(printer, command, command.fullPath.length)
+    printer.print('')
+    printer.printHeading('Usage:')
+    printer.print('')
+    printer.print(application.command + ' ' + command.fullPath + getArgumentStringForCommandUsage(command, commandArguments) + '[OPTIONS]')
     printer.print('')
     if (commandArguments.length) {
         printer.printHeading('Arguments:')
@@ -154,4 +198,15 @@ function printCommandUsage(printer, command, options, commandArguments) {
     maybePrintOptionFamily(printer, 'Global Options', globalOptions)
 }
 
-module.exports = { createDefaultPrinter, maybePrintOptionFamily, printCommands, printGroups, printCommandUsage }
+module.exports = {
+    createDefaultApplication,
+    createDefaultPrinter,
+    maybePrintOptionFamily,
+    printCommands,
+    printGroup,
+    printGroups,
+    printCommandUsage,
+    getHeadlineMessage,
+    getGroupInfoMessage,
+    getCommandInfoMessage
+}

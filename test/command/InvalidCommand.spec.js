@@ -4,5 +4,5 @@ const parser = createParser()
 
 it('should raise error on invalid commands', () => {
     const context = parser.parse(['invalid'])
-    expect(context).toBe('No group or command specified')
+    expect(context).toBe('Not a valid group or command: invalid')
 })
