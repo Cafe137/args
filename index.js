@@ -8,7 +8,7 @@ const {
     createDefaultPrinter,
     createDefaultApplication,
     getHeadlineMessage,
-    printGroup
+    printUsage
 } = require('./src/print')
 const { Group, Command } = require('./src/type')
 
@@ -35,15 +35,15 @@ function createParser(options) {
     const globalOptions = []
     const handleError = (context, reason, silent) => {
         if (!context.group && !context.command) {
-            printer.print(printer.formatDim(getHeadlineMessage(application)))
+            printer.print(getHeadlineMessage(application))
+            printer.print('')
+            printUsage(printer, application)
             printer.print('')
             printGroups(printer, application, groups)
             printCommands(printer, application, commands)
             maybePrintOptionFamily(printer, 'Global Options', globalOptions)
         } else if (!context.command) {
-            printer.printHeading('Current Group:')
-            printer.print('')
-            printGroup(printer, context.group, context.group.fullPath.length)
+            printUsage(printer, application, context.group)
             printer.print('')
             printCommands(printer, application, context.group.commands)
             maybePrintOptionFamily(printer, 'Global Options', globalOptions)

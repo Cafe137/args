@@ -77,6 +77,29 @@ function getLongestKey(items) {
     return items.reduce((x, i) => ((i.fullPath || i.key).length > x ? (i.fullPath || i.key).length : x), 0)
 }
 
+function getArgumentStringForCommandUsage(commandArguments) {
+    if (!commandArguments.length) {
+        return ' '
+    }
+    return ' <' + commandArguments[0].key + '> '
+}
+
+function printUsage(printer, application, group, command, commandArguments) {
+    printer.printHeading('Usage:')
+    printer.print('')
+    if (command) {
+        printer.print(application.command + ' ' + command.fullPath + getArgumentStringForCommandUsage(commandArguments) + '[OPTIONS]')
+        printer.print('')
+        printer.print(command.description)
+    } else if (group) {
+        printer.print(application.command + ' ' + group.fullPath + ' COMMAND [OPTIONS]')
+        printer.print('')
+        printer.print(group.description)
+    } else {
+        printer.print(application.command + ' COMMAND [OPTIONS]')
+    }
+}
+
 function printCommand(printer, command, padLength) {
     if (command.alias) {
         printNameMetaDescription(printer, command.fullPath.padEnd(padLength + EXTRA_SPACE), '[alias: ' + command.alias + ']', command.description)
@@ -166,24 +189,11 @@ function maybePrintOptionFamily(printer, heading, items) {
     }
 }
 
-function getArgumentStringForCommandUsage(command, commandArguments) {
-    if (!commandArguments.length) {
-        return ' '
-    }
-    return ' <' + commandArguments[0].key + '> '
-}
-
 function printCommandUsage(printer, application, command, options, commandArguments) {
     const requiredOptions = options.filter(option => !option.global && option.required)
     const optionalOptions = options.filter(option => !option.global && !option.required)
     const globalOptions = options.filter(option => option.global)
-    printer.printHeading('Current Command:')
-    printer.print('')
-    printCommand(printer, command, command.fullPath.length)
-    printer.print('')
-    printer.printHeading('Usage:')
-    printer.print('')
-    printer.print(application.command + ' ' + command.fullPath + getArgumentStringForCommandUsage(command, commandArguments) + '[OPTIONS]')
+    printUsage(printer, application, null, command, commandArguments)
     printer.print('')
     if (commandArguments.length) {
         printer.printHeading('Arguments:')
@@ -203,10 +213,9 @@ module.exports = {
     createDefaultPrinter,
     maybePrintOptionFamily,
     printCommands,
-    printGroup,
     printGroups,
+    printUsage,
     printCommandUsage,
     getHeadlineMessage,
-    getGroupInfoMessage,
-    getCommandInfoMessage
+    getGroupInfoMessage
 }

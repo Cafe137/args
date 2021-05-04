@@ -80,11 +80,20 @@ it('should print usage for commands without arguments', () => {
     expect(containsItemWithSubstring(calls, 'node random number [OPTIONS]')).toBe(true)
 })
 
-it('should not print usage for commands in group context', () => {
+it('should print general group usage for commands in group context', () => {
     process.stdout.write = jest.fn()
     parser.parse(['random', '--help'])
     const calls = process.stdout.write.mock.calls
-    expect(containsItemWithSubstring(calls, 'Usage:')).toBe(false)
+    expect(containsItemWithSubstring(calls, 'Usage:')).toBe(true)
+    expect(containsItemWithSubstring(calls, 'node random COMMAND [OPTIONS]')).toBe(true)
+})
+
+it('should print general usage for commands in root context', () => {
+    process.stdout.write = jest.fn()
+    parser.parse([''])
+    const calls = process.stdout.write.mock.calls
+    expect(containsItemWithSubstring(calls, 'Usage:')).toBe(true)
+    expect(containsItemWithSubstring(calls, 'node COMMAND [OPTIONS]')).toBe(true)
 })
 
 it('should print usage for commands with arguments when invoked blank', () => {
