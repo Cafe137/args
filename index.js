@@ -27,6 +27,14 @@ function findOptionTargets(context, option) {
     }
 }
 
+function findArgumentTarget(context, commandArguments) {
+    if (context.sibling && context.argumentIndex < context.sibling.command.arguments.length) {
+        return context.sibling.arguments
+    } else if (context.argumentIndex < commandArguments.length) {
+        return context.arguments
+    }
+}
+
 function createParser(options) {
     const printer = (options && options.printer) || createDefaultPrinter()
     const application = (options && options.application) || createDefaultApplication()
@@ -51,7 +59,7 @@ function createParser(options) {
             const siblingOptions = context.sibling ? context.sibling.command.options : []
             const options = [...globalOptions, ...context.command.options, ...siblingOptions]
             const siblingArguments = context.sibling ? context.sibling.command.arguments : []
-            const commandArguments = [...context.command.arguments, ...siblingArguments]
+            const commandArguments = [...siblingArguments, ...context.command.arguments]
             printCommandUsage(printer, application, context.command, options, commandArguments)
         }
         if (!context.options.help && !silent) {
@@ -77,7 +85,8 @@ function createParser(options) {
             const context = {
                 options: {},
                 arguments: {},
-                sourcemap: {}
+                sourcemap: {},
+                argumentIndex: 0
             }
             const findResult = findGroupAndCommand(argv, groups, commands)
             context.group = findResult.group
@@ -122,7 +131,7 @@ function createParser(options) {
             const siblingOptions = sibling ? sibling.options : []
             const options = [...globalOptions, ...context.command.options, ...siblingOptions]
             const siblingArguments = sibling ? sibling.arguments : []
-            const commandArguments = [...context.command.arguments, ...siblingArguments]
+            const commandArguments = [...siblingArguments, ...context.command.arguments]
             if (context.options.help) {
                 printCommandUsage(printer, application, context.command, options, commandArguments)
                 return { exitReason: 'help' }
@@ -150,14 +159,11 @@ function createParser(options) {
                     }
                     i += parseResult.skip
                 } else {
-                    const target = !sibling || !sibling.arguments.length ? context.arguments : context.sibling.arguments
-                    if (!commandArguments.length) {
+                    const target = findArgumentTarget(context, commandArguments)
+                    if (!target) {
                         return handleError(context, 'Unexpected argument: ' + current)
                     }
-                    const argument = commandArguments[0]
-                    if (commandArguments.length && target[argument.key]) {
-                        return handleError(context, 'Argument [' + argument.key + '] is already specified before as: ' + current)
-                    }
+                    const argument = commandArguments[context.argumentIndex++]
                     const parseResult = parseValue(argument, current)
                     if (parseResult instanceof Error) {
                         return handleError(context, parseResult.message)
@@ -186,24 +192,18 @@ function createParser(options) {
                     context.sourcemap[option.key] = 'env'
                 }
             }
-            const commandArgument = context.command.arguments.length ? context.command.arguments[0] : null
-            const siblingArgument = context.sibling && context.sibling.command.arguments.length ? context.sibling.command.arguments[0] : null
-            if (commandArgument && context.arguments[commandArgument.key] === undefined) {
-                if (commandArgument.default !== undefined) {
-                    context.arguments[commandArgument.key] = commandArgument.default
-                    context.sourcemap[commandArgument.key] = 'default'
-                } else if (commandArgument.required) {
-                    const silent = argv.join(' ') === context.command.fullPath
-                    return handleError(context, `Required argument [${commandArgument.key}] is not provided`, silent)
-                }
-            }
-            if (siblingArgument && context.sibling.arguments[siblingArgument.key] === undefined) {
-                if (siblingArgument.default !== undefined) {
-                    context.sibling.arguments[siblingArgument.key] = siblingArgument.default
-                    context.sourcemap[siblingArgument.key] = 'default'
-                } else if (siblingArgument.required) {
-                    const silent = argv.join(' ') === context.command.fullPath
-                    return handleError(context, `Required argument [${siblingArgument.key}] is not provided`, silent)
+            context.argumentIndex = 0
+            for (const commandArgument of commandArguments) {
+                const target = findArgumentTarget(context, commandArguments)
+                context.argumentIndex++
+                if (target[commandArgument.key] === undefined) {
+                    if (commandArgument.default !== undefined) {
+                        target[commandArgument.key] = commandArgument.default
+                        context.sourcemap[commandArgument.key] = 'default'
+                    } else if (commandArgument.required) {
+                        const silent = argv.join(' ') === context.command.fullPath
+                        return handleError(context, `Required argument [${commandArgument.key}] is not provided`, silent)
+                    }
                 }
             }
             for (const option of options) {

@@ -81,7 +81,7 @@ function getArgumentStringForCommandUsage(commandArguments) {
     if (!commandArguments.length) {
         return ' '
     }
-    return ' <' + commandArguments[0].key + '> '
+    return ' ' + commandArguments.map(x => '<' + x.key + '>').join(' ') + ' '
 }
 
 function printUsage(printer, application, group, command, commandArguments) {
