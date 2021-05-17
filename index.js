@@ -210,8 +210,8 @@ function createParser(options) {
                 if (option.conflicts && context.options[option.key] && context.options[option.conflicts]) {
                     return handleError(context, option.key + ' and ' + option.conflicts + ' are incompatible, please only specify one.')
                 }
+                const targets = findOptionTargets(context, option)
                 if (option.default !== undefined) {
-                    const targets = findOptionTargets(context, option)
                     for (const target of targets) {
                         if (target[option.key] !== undefined) {
                             continue
@@ -220,8 +220,12 @@ function createParser(options) {
                         context.sourcemap[option.key] = 'default'
                     }
                 }
-                if (option.required && !context.options[option.key] && (!option.conflicts || !context.options[option.conflicts])) {
-                    return handleError(context, 'Required option not provided: ' + option.key)
+                if (option.required) {
+                    for (const target of targets) {
+                        if (target[option.key] === undefined && (!option.conflicts || target[option.conflicts] === undefined)) {
+                            return handleError(context, 'Required option not provided: ' + option.key)
+                        }
+                    }
                 }
             }
             return context
