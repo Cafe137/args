@@ -15,12 +15,18 @@ function parseValue(option, rawValue) {
         if (option.minimum !== undefined && value < option.minimum) {
             return Error('[' + key + '] must be at least ' + option.minimum)
         }
+        if (option.maximum !== undefined && value > option.maximum) {
+            return Error('[' + key + '] must be at most ' + option.maximum)
+        }
         return { value, skip: 1 }
     } else if (type === 'bigint') {
         try {
             const value = BigInt(rawValue)
             if (option.minimum !== undefined && value < option.minimum) {
                 return Error('[' + key + '] must be at least ' + option.minimum)
+            }
+            if (option.maximum !== undefined && value > option.maximum) {
+                return Error('[' + key + '] must be at most ' + option.maximum)
             }
             return { value, skip: 1 }
         } catch {

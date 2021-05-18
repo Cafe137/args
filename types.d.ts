@@ -10,6 +10,7 @@ declare module 'cafe-args' {
         alias?: string
         envKey?: string
         minimum?: number | bigint
+        maximum?: number | bigint
         handler?: () => void
     }
 
