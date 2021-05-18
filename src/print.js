@@ -177,7 +177,12 @@ function printOptionFamily(printer, heading, items) {
     const length = getLongestKey(items) + 5 + EXTRA_SPACE
     printer.printHeading(heading + ':')
     printer.print('')
+    const seen = {}
     for (const option of items) {
+        if (seen[option.key]) {
+            continue
+        }
+        seen[option.key] = true
         printOption(printer, option, length)
     }
     printer.print('')
