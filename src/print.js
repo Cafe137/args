@@ -178,12 +178,24 @@ function printOptionFamily(printer, heading, items) {
     printer.printHeading(heading + ':')
     printer.print('')
     const seen = {}
+    const xors = []
     for (const option of items) {
         if (seen[option.key]) {
             continue
         }
         seen[option.key] = true
+        if (option.conflicts) {
+            const order = option.key.localeCompare(option.conflicts)
+            const text = order === -1 ? `[${option.key}] or [${option.conflicts}]` : `[${option.conflicts}] or [${option.key}]`
+            if (!xors.includes(text)) {
+                xors.push(text)
+            }
+        }
         printOption(printer, option, length)
+    }
+    if (xors.length) {
+        printer.print('')
+        printer.print('Only one is required: ' + xors.join(', '))
     }
     printer.print('')
 }
