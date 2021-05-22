@@ -11,6 +11,7 @@ declare module 'cafe-args' {
         envKey?: string
         minimum?: number | bigint
         maximum?: number | bigint
+        noErrors?: boolean
         handler?: () => void
     }
 

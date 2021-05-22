@@ -204,7 +204,7 @@ function createParser(options) {
                     if (commandArgument.default !== undefined) {
                         target[commandArgument.key] = commandArgument.default
                         context.sourcemap[commandArgument.key] = 'default'
-                    } else if (commandArgument.required) {
+                    } else if (commandArgument.required && !commandArgument.noErrors) {
                         const silent = argv.join(' ') === context.command.fullPath
                         return handleError(context, `Required argument [${commandArgument.key}] is not provided`, silent)
                     }
@@ -226,7 +226,7 @@ function createParser(options) {
                 }
                 if (option.required) {
                     for (const target of targets) {
-                        if (target[option.key] === undefined && (!option.conflicts || target[option.conflicts] === undefined)) {
+                        if (target[option.key] === undefined && !option.noErrors && (!option.conflicts || target[option.conflicts] === undefined)) {
                             return handleError(context, 'Required option not provided: ' + option.key)
                         }
                     }
