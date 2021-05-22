@@ -1,5 +1,6 @@
 function prependName(group, name) {
     group.fullPath = name + ' ' + group.fullPath
+    group.depth++
     for (const child of group.groups) {
         prependName(child, name)
     }
@@ -15,6 +16,7 @@ function Group(key, description) {
     this.groups = []
     this.commands = []
     this.fullPath = key
+    this.depth = 0
     this.withGroup = function (group) {
         this.groups.push(group)
         prependName(group, this.fullPath)

@@ -71,6 +71,7 @@ declare module 'cafe-args' {
     }
 
     export interface Parser {
+        suggest(line: string): string[]
         parse(argv: string[]): Context
         addGroup(group: Group): void
         addCommand(command: Command): void

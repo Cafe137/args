@@ -10,6 +10,7 @@ const {
     getHeadlineMessage,
     printUsage
 } = require('./src/print')
+const { suggest } = require('./src/suggest')
 const { Group, Command } = require('./src/type')
 
 function findOptionTargets(context, option) {
@@ -80,6 +81,9 @@ function createParser(options) {
         },
         addCommand: command => {
             commands.push(command)
+        },
+        suggest: line => {
+            return suggest(line, [...groups, ...commands], globalOptions)
         },
         parse: argv => {
             const context = {
