@@ -6,7 +6,7 @@ parser.addCommand(new Command('prefixed-command', 'N/A'))
 parser.addGroup(new Group('group', 'N/A').withCommand(new Command('nested-command', 'N/A')))
 parser.addGroup(new Group('prefixed-group', 'N/A').withCommand(new Command('prefixed-nested-command', 'N/A')))
 
-it('should suggest single nexted command', () => {
+it('should suggest single nested command', () => {
     const suggestions = parser.suggest('group ne')
     expect(suggestions).toHaveProperty('length', 1)
     expect(suggestions).toHaveProperty('0', 'nested-command')
