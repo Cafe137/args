@@ -1,3 +1,11 @@
+function prepareNumericalString(string) {
+    const replaced = string && string.replace ? string.replace(/_/g, '') : string
+    if (replaced === '') {
+        return null
+    }
+    return replaced
+}
+
 function parseValue(option, rawValue) {
     const { key, type } = option
     if (type === 'boolean') {
@@ -8,7 +16,7 @@ function parseValue(option, rawValue) {
         }
         return { value: true, skip: 0 }
     } else if (type === 'number') {
-        const value = parseInt(rawValue, 10)
+        const value = parseInt(prepareNumericalString(rawValue), 10)
         if (isNaN(value)) {
             return Error('Expected number for ' + key + ', got ' + rawValue)
         }
@@ -21,7 +29,7 @@ function parseValue(option, rawValue) {
         return { value, skip: 1 }
     } else if (type === 'bigint') {
         try {
-            const value = BigInt(rawValue)
+            const value = BigInt(prepareNumericalString(rawValue))
             if (option.minimum !== undefined && value < option.minimum) {
                 return Error('[' + key + '] must be at least ' + option.minimum)
             }
