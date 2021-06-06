@@ -1,5 +1,4 @@
-const { createParser, Command } = require('../../index')
-const { Group } = require('../../src/type')
+const { createParser, Command, Group } = require('../../index')
 
 const parser = createParser()
 parser.addGroup(
