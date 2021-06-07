@@ -28,7 +28,8 @@ function parseNumber(option, rawValue) {
     if (!/^\-?[0-9_]+$/.test(parsableString)) {
         return Error('Expected number for ' + option.key + ', got ' + rawValue)
     }
-    const value = parseInt(prepareNumericalString(parsableString), 10)
+    const parsedValue = parseInt(prepareNumericalString(parsableString), 10)
+    const value = multiplier ? parsedValue * multiplier.n : parsedValue
     if (isNaN(value)) {
         return Error('Expected number for ' + option.key + ', got ' + rawValue)
     }
@@ -38,21 +39,22 @@ function parseNumber(option, rawValue) {
     if (option.maximum !== undefined && value > option.maximum) {
         return Error('[' + option.key + '] must be at most ' + option.maximum)
     }
-    return { value: multiplier ? value * multiplier.n : value, skip: 1 }
+    return { value, skip: 1 }
 }
 
 function parseBigInt(option, rawValue) {
     try {
         const multiplier = parseNumericalUnit(rawValue)
         const parsableString = multiplier ? rawValue.slice(0, rawValue.length - 1) : rawValue
-        const value = BigInt(prepareNumericalString(parsableString))
+        const parsedValue = BigInt(prepareNumericalString(parsableString))
+        const value = multiplier ? parsedValue * multiplier.b : parsedValue
         if (option.minimum !== undefined && value < option.minimum) {
             return Error('[' + option.key + '] must be at least ' + option.minimum)
         }
         if (option.maximum !== undefined && value > option.maximum) {
             return Error('[' + option.key + '] must be at most ' + option.maximum)
         }
-        return { value: multiplier ? value * multiplier.b : value, skip: 1 }
+        return { value, skip: 1 }
     } catch {
         return Error('Expected BigInt for ' + option.key + ', got ' + rawValue)
     }

@@ -13,3 +13,9 @@ it('should allow bigint exactly the minimum', () => {
     expect(context).toHaveProperty('options')
     expect(context.options).toHaveProperty('amount', 50n)
 })
+
+it('should allow bigints that look less than minimum but have unit', () => {
+    const context = parser.parse(['withdraw', '--amount', '1M'])
+    expect(context).toHaveProperty('options')
+    expect(context.options).toHaveProperty('amount', 1_000_000n)
+})

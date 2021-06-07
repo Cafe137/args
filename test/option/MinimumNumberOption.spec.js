@@ -13,3 +13,9 @@ it('should allow numbers exactly the minimum', () => {
     expect(context).toHaveProperty('options')
     expect(context.options).toHaveProperty('amount', 100)
 })
+
+it('should allow numbers that look less than minimum but have unit', () => {
+    const context = parser.parse(['deposit', '--amount', '50k'])
+    expect(context).toHaveProperty('options')
+    expect(context.options).toHaveProperty('amount', 50_000)
+})
