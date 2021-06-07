@@ -58,8 +58,41 @@ function parseBigInt(option, rawValue) {
     }
 }
 
+function validateStringLength(option, string) {
+    if (option.length && string.length !== option.length) {
+        return Error('[' + option.key + '] must have length of ' + option.length + ' characters')
+    }
+    if (option.minimumLength && string.length < option.minimumLength) {
+        return Error('[' + option.key + '] must have length of at least ' + option.minimumLength + ' characters')
+    }
+    if (option.maximumLength && string.length > option.maximumLength) {
+        return Error('[' + option.key + '] must have length of at most ' + option.maximumLength + ' characters')
+    }
+}
+
+function parseHexString(option, rawValue) {
+    const lowercase = rawValue.toLowerCase()
+    const hexString = lowercase.startsWith('0x') ? lowercase.slice(2) : lowercase
+    if (!/^[a-f0-9]+$/.test(hexString)) {
+        return Error('Expected hex string for ' + option.key + ', got ' + rawValue)
+    }
+    const lengthError = validateStringLength(option, hexString)
+    if (lengthError) {
+        return lengthError
+    }
+    if (!option.oddLength) {
+        if (hexString.length % 2 === 1) {
+            return Error('[' + option.key + '] must have even length')
+        }
+    }
+    return {
+        value: hexString,
+        skip: 1
+    }
+}
+
 function parseValue(option, rawValue) {
-    const { key, type } = option
+    const { type } = option
     if (type === 'boolean') {
         if (rawValue === 'true') {
             return { value: true, skip: 1 }
@@ -71,8 +104,10 @@ function parseValue(option, rawValue) {
         return parseNumber(option, rawValue)
     } else if (type === 'bigint') {
         return parseBigInt(option, rawValue)
+    } else if (type === 'hex-string') {
+        return parseHexString(option, rawValue)
     } else {
-        return { value: rawValue, skip: 1 }
+        return validateStringLength(option, rawValue) || { value: rawValue, skip: 1 }
     }
 }
 
