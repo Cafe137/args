@@ -211,11 +211,8 @@ function createParser(options) {
                 }
             }
             for (const option of options) {
-                if (option.conflicts && context.options[option.key] && context.options[option.conflicts]) {
-                    return handleError(context, option.key + ' and ' + option.conflicts + ' are incompatible, please only specify one.')
-                }
                 const targets = findOptionTargets(context, option)
-                if (option.default !== undefined) {
+                if (option.default !== undefined && (!option.conflicts || context.options[option.conflicts] === undefined)) {
                     for (const target of targets) {
                         if (target[option.key] !== undefined) {
                             continue
@@ -223,6 +220,9 @@ function createParser(options) {
                         target[option.key] = option.default
                         context.sourcemap[option.key] = 'default'
                     }
+                }
+                if (option.conflicts && context.options[option.key] && context.options[option.conflicts]) {
+                    return handleError(context, option.key + ' and ' + option.conflicts + ' are incompatible, please only specify one.')
                 }
                 if (option.required) {
                     for (const target of targets) {
