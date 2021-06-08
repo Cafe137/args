@@ -226,7 +226,13 @@ function createParser(options) {
                 }
                 if (option.required) {
                     for (const target of targets) {
-                        if (target[option.key] === undefined && !option.noErrors && (!option.conflicts || target[option.conflicts] === undefined)) {
+                        if (
+                            target[option.key] === undefined &&
+                            !option.noErrors &&
+                            (!option.conflicts || target[option.conflicts] === undefined) &&
+                            (!option.required.when || target[option.required.when]) &&
+                            (!option.required.unless || !target[option.required.unless])
+                        ) {
                             return handleError(context, 'Required option not provided: ' + option.key)
                         }
                     }

@@ -161,9 +161,16 @@ function printNameMetaDescription(printer, name, meta, description) {
 
 function printOption(printer, option, padLength) {
     const aliasString = option.alias ? '-' + option.alias : '  '
-    const defaultString = option.default !== undefined ? ', default: ' + String(option.defaultDescription || option.default) : ''
+    const typeString = `[${option.type || 'string'}]`
+    const defaultString = option.default !== undefined ? '[default ' + String(option.defaultDescription || option.default) + ']' : ''
+    const requiredString =
+        option.required && option.required.when
+            ? `[required when ${option.required.when}]`
+            : option.required && option.required.unless
+            ? `[required unless ${option.required.unless}]`
+            : ''
     const name = `${aliasString} --${option.key}`.padEnd(padLength)
-    const meta = `[${option.type || 'string'}${defaultString}]`
+    const meta = `${requiredString}${typeString}${defaultString}`
     printNameMetaDescription(printer, name, meta, option.description)
 }
 

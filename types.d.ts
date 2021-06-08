@@ -3,7 +3,7 @@ declare module 'cafe-args' {
         key: string
         description: string
         type?: string
-        required?: boolean
+        required?: boolean | { when: string } | { unless: string }
         conflicts?: string
         default?: unknown
         defaultDescription?: string
@@ -77,7 +77,7 @@ declare module 'cafe-args' {
 
     export interface Parser {
         suggest(line: string): string[]
-        parse(argv: string[]): Context
+        parse(argv: string[]): string | Context
         addGroup(group: Group): void
         addCommand(command: Command): void
         addGlobalOption(option: Argument): void
