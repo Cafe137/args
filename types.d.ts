@@ -16,6 +16,7 @@ declare module 'cafe-args' {
         maximumLength?: number
         oddLength?: boolean
         noErrors?: boolean
+        autocompletePath?: boolean
         handler?: () => void
     }
 
@@ -76,7 +77,7 @@ declare module 'cafe-args' {
     }
 
     export interface Parser {
-        suggest(line: string): string[]
+        suggest(line: string, offset: number): Promise<string[]>
         parse(argv: string[]): string | Context
         addGroup(group: Group): void
         addCommand(command: Command): void
@@ -86,9 +87,20 @@ declare module 'cafe-args' {
     export interface ParserOptions {
         printer?: Printer
         application?: Application
+        pathResolver?: (word: string) => Promise<string[]>
     }
 
     export function createParser(options?: ParserOptions): Parser
+
+    export function tokenize(string: string, offset: number): string[]
+
+    export type Shell = 'fish' | 'zsh' | 'bash'
+
+    export function detectShell(string: string): Shell | null
+
+    export function getShellPath(shell: Shell): string
+
+    export function generateCompletion(command: string, shell: Shell): string
 
     export interface Printer {
         print(text: string): void

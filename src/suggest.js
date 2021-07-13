@@ -1,27 +1,27 @@
+const { tokenize } = require('./tokenize')
+
 function getSiblingOptions(name, entries) {
     return entries.find(entry => entry.fullPath === name).options
 }
 
-function isOptionSpecified(line, option) {
-    if (line.includes('--' + option.key + ' ')) {
+function isOptionSpecified(context, option) {
+    if (context.argv.includes('--' + option.key) && context.token !== '--' + option.key) {
         return true
     }
-    if (option.alias && line.includes('-' + option.alias + ' ')) {
+    if (option.alias && context.argv.includes('-' + option.alias) && context.token !== '-' + option.alias) {
         return true
     }
     return false
 }
 
-function findMatchingOptions(line, options) {
-    const words = line.split(' ')
-    const lastWord = words[words.length - 1]
-    if (lastWord === '' || lastWord === '-' || lastWord === '--') {
+function findMatchingOptions(context, options) {
+    if (['', '-', '--'].includes(context.token)) {
         return options.map(option => '--' + option.key)
     }
-    if (lastWord.startsWith('--')) {
-        return options.filter(option => option.key.startsWith(lastWord.slice(2))).map(option => '--' + option.key)
-    } else if (lastWord.startsWith('-')) {
-        return options.filter(option => option.alias && option.alias.startsWith(lastWord.slice(1))).map(option => '-' + option.alias)
+    if (context.token.startsWith('--')) {
+        return options.filter(option => option.key.startsWith(context.token.slice(2))).map(option => '--' + option.key)
+    } else if (context.token.startsWith('-')) {
+        return options.filter(option => option.alias && option.alias.startsWith(context.token.slice(1))).map(option => '-' + option.alias)
     }
     return []
 }
@@ -55,28 +55,110 @@ function flatten(results, node) {
     }
 }
 
-function suggest(line, entries, globalOptions) {
-    if (line === '') {
+function findOptionForWord(command, word, globalOptions) {
+    const all = [...command.options, ...globalOptions]
+    if (word.startsWith('--')) {
+        return all.find(option => option.key === word.slice(2))
+    } else if (word.startsWith('-')) {
+        return all.find(option => option.alias === word.slice(1))
+    }
+    return null
+}
+
+function getPreviousOption(command, context, globalOptions) {
+    const word = context.opensNext ? context.argv[context.argv.length - 1] : context.argv[context.argv.length - 2]
+    return findOptionForWord(command, word, globalOptions)
+}
+
+function isBooleanTrueLike(word) {
+    return word && word.length && 'true'.startsWith(word)
+}
+
+function isBooleanFalseLike(word) {
+    return word && word.length && 'false'.startsWith(word)
+}
+
+function getPositionalArgument(command, context, globalOptions) {
+    if (!command.arguments) {
+        return null
+    }
+    const commandWords = command.fullPath.split(' ').length
+    if (commandWords === context.argv.length && context.opensNext) {
+        return command.arguments[0]
+    }
+    let argumentIndex = -1
+    for (let i = commandWords; i < context.argv.length; i++) {
+        const word = context.argv[i]
+        const next = context.argv[i + 1]
+        const option = findOptionForWord(command, word, globalOptions)
+        if (option) {
+            if (option.type === 'boolean') {
+                if (isBooleanTrueLike(next) || isBooleanFalseLike(next)) {
+                    i++
+                    continue
+                }
+            } else {
+                i++
+                continue
+            }
+        } else {
+            argumentIndex++
+        }
+    }
+    if (context.opensNext) {
+        argumentIndex++
+    }
+    return Object.values(command.arguments)[argumentIndex]
+}
+
+async function handleMatch(context, match, entries, globalOptions, pathResolver) {
+    const options = [...match.options, ...(match.sibling ? getSiblingOptions(match.sibling, entries) : []), ...globalOptions]
+    const previousOption = getPreviousOption(match, context, globalOptions)
+    if (previousOption && previousOption.type === 'boolean' && context.token) {
+        if (isBooleanTrueLike(context.token)) {
+            return ['true']
+        }
+        if (isBooleanFalseLike(context.token)) {
+            return ['false']
+        }
+    }
+    if (previousOption && previousOption.autocompletePath) {
+        return pathResolver(context.token)
+    }
+    if (!context.token.startsWith('-')) {
+        const positionalArgument = getPositionalArgument(match, context, globalOptions)
+        if (positionalArgument && positionalArgument.autocompletePath) {
+            return pathResolver(context.token)
+        }
+    }
+    const missingOptions = options.filter(option => !isOptionSpecified(context, option))
+    return findMatchingOptions(context, missingOptions)
+}
+
+async function suggest(line, offset, entries, globalOptions, pathResolver) {
+    const context = tokenize(line, offset)
+    if (!context.argv.length) {
         return entries.filter(entry => entry.depth === 0).map(x => x.key)
     }
+    const normalLine = context.argv.join(' ') + (context.opensNext ? ' ' : '')
     const nodes = []
     for (const entry of entries) {
         flatten(nodes, entry)
     }
+    const match = nodes.find(node => normalLine.startsWith(node.fullPath + ' ') && node.options)
+    if (match) {
+        return handleMatch(context, match, entries, globalOptions, pathResolver)
+    }
     for (const node of nodes) {
-        node.matchingPartLength = getMatchingPartLength(line, node.fullPath)
+        node.matchingPartLength = getMatchingPartLength(normalLine, node.fullPath)
     }
     const longestMatchingPartLength = nodes.reduce(selectLongerMatchingPartNode).matchingPartLength
+    if (!longestMatchingPartLength) {
+        return []
+    }
     const substringMatches = nodes.filter(node => node.matchingPartLength === longestMatchingPartLength)
     const lowestDepth = substringMatches.reduce(selectLowestDepthNode).depth
     const matches = substringMatches.filter(node => node.depth === lowestDepth)
-    const isSingleExactMatch = matches.length === 1 && line.startsWith(matches[0].fullPath + ' ')
-    if (isSingleExactMatch) {
-        const match = matches[0]
-        const options = [...match.options, ...(match.sibling ? getSiblingOptions(match.sibling, entries) : []), ...globalOptions]
-        const missingOptions = options.filter(option => !isOptionSpecified(line, option))
-        return findMatchingOptions(line, missingOptions)
-    }
     return matches.map(x => x.key)
 }
 

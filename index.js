@@ -1,5 +1,6 @@
 const { isOption, findGroupAndCommand, findOption, isOptionPassed, findCommandByFullPath, findLongOption } = require('./src/argv')
 const { parseValue } = require('./src/parse')
+const { completePath } = require('./src/path')
 const {
     printCommandUsage,
     printGroups,
@@ -11,7 +12,9 @@ const {
     printUsage
 } = require('./src/print')
 const { suggest } = require('./src/suggest')
+const { tokenize } = require('./src/tokenize')
 const { Group, Command } = require('./src/type')
+const { detectShell, generateCompletion, getShellPath } = require('./src/shell')
 
 function findOptionTargets(context, option) {
     if (option.global) {
@@ -39,6 +42,7 @@ function findArgumentTarget(context, commandArguments) {
 function createParser(options) {
     const printer = (options && options.printer) || createDefaultPrinter()
     const application = (options && options.application) || createDefaultApplication()
+    const pathResolver = (options && options.pathResolver) || completePath
     const groups = []
     const commands = []
     const globalOptions = []
@@ -82,8 +86,8 @@ function createParser(options) {
         addCommand: command => {
             commands.push(command)
         },
-        suggest: line => {
-            return suggest(line, [...groups, ...commands], globalOptions)
+        suggest: (line, offset = 0) => {
+            return suggest(line, offset, [...groups, ...commands], globalOptions, pathResolver)
         },
         parse: argv => {
             const context = {
@@ -243,4 +247,4 @@ function createParser(options) {
     }
 }
 
-module.exports = { createParser, Group, Command }
+module.exports = { tokenize, createParser, Group, Command, getShellPath, generateCompletion, detectShell }
