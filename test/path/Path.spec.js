@@ -99,3 +99,8 @@ it('should allow directory reentry', async () => {
     expect(suggestions[1]).toBe('./test-data/../test-data/../test-data/../test-data/beta/')
     expect(suggestions[2]).toBe('./test-data/../test-data/../test-data/../test-data/gamma/')
 })
+
+it('should add trailing spaces to files only', async () => {
+    const suggestions = await parser.suggest('file test-data/gamma/', 0, ' ')
+    expect(suggestions).toStrictEqual(['test-data/gamma/epsilon.txt ', 'test-data/gamma/eta/', 'test-data/gamma/iota.txt ', 'test-data/gamma/theta/'])
+})

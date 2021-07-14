@@ -1,21 +1,23 @@
-const BASH_TEMPLATE = `_$1_completion() {
+const BASH_TEMPLATE = `_$1() {
+    local IFS=$'\\n'
     local cur prev nb_colon
     _get_comp_words_by_ref -n : cur prev
     nb_colon=$(grep -o ":" <<< "$COMP_LINE" | wc -l)
-    COMPREPLY=( $(compgen -W '$($2 --compgen "\${COMP_LINE}")' -- "$cur") )
+    COMPREPLY=( $(compgen -W '$($2 --compbash --compgen "\${COMP_LINE}")' -- "$cur") )
     __ltrim_colon_completions "$cur"
 }
-complete -F _$1_completion $2`
+complete -o nospace -F _$1 $2`
 
-const ZSH_TEMPLATE = `_$1_complete() {
-    compadd -- \`$2 --compgen "\${BUFFER}"\`
+const ZSH_TEMPLATE = `_$1() {
+    local IFS=$'\\n'
+    compadd -Q -S '' -- \`$2 --compzsh --compgen "\${BUFFER}"\`
 }
-compdef _$1_complete $2`
+compdef _$1 $2`
 
-const FISH_TEMPLATE = `function _$1_completion
-    $2 --compgen (commandline -pb)
+const FISH_TEMPLATE = `function _$1
+    $2 --compfish --compgen (commandline -pb)
 end
-complete -f -c $2 -a '(_$1_completion)'`
+complete -f -c $2 -a '(_$1)'`
 
 function generateBashCompletion(command) {
     const name = command.replace(/-/g, '_')

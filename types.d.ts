@@ -77,7 +77,7 @@ declare module 'cafe-args' {
     }
 
     export interface Parser {
-        suggest(line: string, offset: number): Promise<string[]>
+        suggest(line: string, offset: number, trailing: string): Promise<string[]>
         parse(argv: string[]): string | Context
         addGroup(group: Group): void
         addCommand(command: Command): void

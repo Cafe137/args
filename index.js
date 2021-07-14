@@ -86,8 +86,8 @@ function createParser(options) {
         addCommand: command => {
             commands.push(command)
         },
-        suggest: (line, offset = 0) => {
-            return suggest(line, offset, [...groups, ...commands], globalOptions, pathResolver)
+        suggest: (line, offset = 0, trailing = '') => {
+            return suggest(line, offset, [...groups, ...commands], globalOptions, pathResolver, trailing)
         },
         parse: argv => {
             const context = {

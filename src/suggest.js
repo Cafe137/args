@@ -135,10 +135,20 @@ async function handleMatch(context, match, entries, globalOptions, pathResolver)
     return findMatchingOptions(context, missingOptions)
 }
 
-async function suggest(line, offset, entries, globalOptions, pathResolver) {
+function trail(suggestions, trailing) {
+    if (!trailing || !suggestions.length) {
+        return suggestions
+    }
+    return suggestions.map(suggestion => (suggestion.endsWith('/') ? suggestion : suggestion + trailing))
+}
+
+async function suggest(line, offset, entries, globalOptions, pathResolver, trailing) {
     const context = tokenize(line, offset)
     if (!context.argv.length) {
-        return entries.filter(entry => entry.depth === 0).map(x => x.key)
+        return trail(
+            entries.filter(entry => entry.depth === 0).map(x => x.key),
+            trailing
+        )
     }
     const normalLine = context.argv.join(' ') + (context.opensNext ? ' ' : '')
     const nodes = []
@@ -147,7 +157,7 @@ async function suggest(line, offset, entries, globalOptions, pathResolver) {
     }
     const match = nodes.find(node => normalLine.startsWith(node.fullPath + ' ') && node.options)
     if (match) {
-        return handleMatch(context, match, entries, globalOptions, pathResolver)
+        return trail(await handleMatch(context, match, entries, globalOptions, pathResolver), trailing)
     }
     for (const node of nodes) {
         node.matchingPartLength = getMatchingPartLength(normalLine, node.fullPath)
@@ -159,7 +169,10 @@ async function suggest(line, offset, entries, globalOptions, pathResolver) {
     const substringMatches = nodes.filter(node => node.matchingPartLength === longestMatchingPartLength)
     const lowestDepth = substringMatches.reduce(selectLowestDepthNode).depth
     const matches = substringMatches.filter(node => node.depth === lowestDepth)
-    return matches.map(x => x.key)
+    return trail(
+        matches.map(x => x.key),
+        trailing
+    )
 }
 
 module.exports = { suggest }
