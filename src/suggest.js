@@ -4,6 +4,10 @@ function getSiblingOptions(name, entries) {
     return entries.find(entry => entry.fullPath === name).options
 }
 
+function getSiblingArguments(name, entries) {
+    return entries.find(entry => entry.fullPath === name).arguments
+}
+
 function isOptionSpecified(context, option) {
     if (context.argv.includes('--' + option.key) && context.token !== '--' + option.key) {
         return true
@@ -55,19 +59,18 @@ function flatten(results, node) {
     }
 }
 
-function findOptionForWord(command, word, globalOptions) {
-    const all = [...command.options, ...globalOptions]
+function findOptionForWord(word, options) {
     if (word.startsWith('--')) {
-        return all.find(option => option.key === word.slice(2))
+        return options.find(option => option.key === word.slice(2))
     } else if (word.startsWith('-')) {
-        return all.find(option => option.alias === word.slice(1))
+        return options.find(option => option.alias === word.slice(1))
     }
     return null
 }
 
-function getPreviousOption(command, context, globalOptions) {
+function getPreviousOption(context, options) {
     const word = context.opensNext ? context.argv[context.argv.length - 1] : context.argv[context.argv.length - 2]
-    return findOptionForWord(command, word, globalOptions)
+    return findOptionForWord(word, options)
 }
 
 function isBooleanTrueLike(word) {
@@ -78,19 +81,19 @@ function isBooleanFalseLike(word) {
     return word && word.length && 'false'.startsWith(word)
 }
 
-function getPositionalArgument(command, context, globalOptions) {
-    if (!command.arguments) {
+function getPositionalArgument(command, context, allArguments, globalOptions) {
+    if (!allArguments.length) {
         return null
     }
     const commandWords = command.fullPath.split(' ').length
     if (commandWords === context.argv.length && context.opensNext) {
-        return command.arguments[0]
+        return allArguments[0]
     }
     let argumentIndex = -1
     for (let i = commandWords; i < context.argv.length; i++) {
         const word = context.argv[i]
         const next = context.argv[i + 1]
-        const option = findOptionForWord(command, word, globalOptions)
+        const option = findOptionForWord(word, globalOptions)
         if (option) {
             if (option.type === 'boolean') {
                 if (isBooleanTrueLike(next) || isBooleanFalseLike(next)) {
@@ -108,12 +111,13 @@ function getPositionalArgument(command, context, globalOptions) {
     if (context.opensNext) {
         argumentIndex++
     }
-    return Object.values(command.arguments)[argumentIndex]
+    return Object.values(allArguments)[argumentIndex]
 }
 
 async function handleMatch(context, match, entries, globalOptions, pathResolver) {
     const options = [...match.options, ...(match.sibling ? getSiblingOptions(match.sibling, entries) : []), ...globalOptions]
-    const previousOption = getPreviousOption(match, context, globalOptions)
+    const allArguments = [...match.arguments, ...(match.sibling ? getSiblingArguments(match.sibling, entries) : [])]
+    const previousOption = getPreviousOption(context, options)
     if (previousOption && previousOption.type === 'boolean' && context.token) {
         if (isBooleanTrueLike(context.token)) {
             return ['true']
@@ -126,7 +130,7 @@ async function handleMatch(context, match, entries, globalOptions, pathResolver)
         return pathResolver(context.token)
     }
     if (!context.token.startsWith('-')) {
-        const positionalArgument = getPositionalArgument(match, context, globalOptions)
+        const positionalArgument = getPositionalArgument(match, context, allArguments, globalOptions)
         if (positionalArgument && positionalArgument.autocompletePath) {
             return pathResolver(context.token)
         }

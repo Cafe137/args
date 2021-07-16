@@ -11,17 +11,17 @@ parser.addGlobalOption({
     }
 })
 
-it('should handle --version specially', () => {
-    const context = parser.parse(['--version'])
+it('should handle --version specially', async () => {
+    const context = await parser.parse(['--version'])
     expect(context).toHaveProperty('exitReason', 'version')
 })
 
-it('should handle -V specially', () => {
-    const context = parser.parse(['-V'])
+it('should handle -V specially', async () => {
+    const context = await parser.parse(['-V'])
     expect(context).toHaveProperty('exitReason', 'version')
 })
 
-it('should not handle -v', () => {
-    const context = parser.parse(['-v'])
+it('should not handle -v', async () => {
+    const context = await parser.parse(['-v'])
     expect(context).toBe('Not a valid group or command: -v')
 })

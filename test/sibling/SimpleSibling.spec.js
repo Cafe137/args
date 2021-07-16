@@ -4,8 +4,8 @@ const parser = createParser()
 parser.addGroup(new Group('feed', 'Test').withCommand(new Command('upload', 'Upload to feed', { sibling: 'upload' })))
 parser.addCommand(new Command('upload', 'Upload file').withPositional({ key: 'path', description: 'Path to file', type: 'string' }))
 
-it('should support sibling commands', () => {
-    const context = parser.parse(['feed', 'upload', 'README.md'])
+it('should support sibling commands', async () => {
+    const context = await parser.parse(['feed', 'upload', 'README.md'])
     expect(context).toHaveProperty('group')
     expect(context).toHaveProperty('command')
     expect(context).toHaveProperty('sibling')

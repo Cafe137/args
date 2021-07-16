@@ -9,8 +9,8 @@ parser.addGroup(
     )
 )
 
-it('should find command within nested groups', () => {
-    const context = parser.parse(['primary', 'secondary', 'tertiary', 'quaternary', 'command'])
+it('should find command within nested groups', async () => {
+    const context = await parser.parse(['primary', 'secondary', 'tertiary', 'quaternary', 'command'])
     expect(context).toHaveProperty('group')
     expect(context.group).toHaveProperty('fullPath', 'primary secondary tertiary quaternary')
     expect(context.group).toHaveProperty('key', 'quaternary')
@@ -19,7 +19,7 @@ it('should find command within nested groups', () => {
     expect(context.command).toHaveProperty('fullPath', 'primary secondary tertiary quaternary command')
 })
 
-it('should find intermediary group within nested groups', () => {
-    const context = parser.parse(['primary', 'secondary', 'tertiary'])
+it('should find intermediary group within nested groups', async () => {
+    const context = await parser.parse(['primary', 'secondary', 'tertiary'])
     expect(context).toBe('You need to specify a command in group [tertiary]')
 })

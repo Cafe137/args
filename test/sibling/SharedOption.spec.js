@@ -11,8 +11,8 @@ parser.addCommand(
 )
 parser.addCommand(new Command('reupload', 'N/A', { sibling: 'download' }).withOption({ key: 'name', description: 'N/A', type: 'string', required: true }))
 
-it('should set same option for both commands', () => {
-    const context = parser.parse(['reupload', '--name', 'upload.png'])
+it('should set same option for both commands', async () => {
+    const context = await parser.parse(['reupload', '--name', 'upload.png'])
     expect(context).toHaveProperty('options')
     expect(context.options).toHaveProperty('name', 'upload.png')
     expect(context).toHaveProperty('sibling')

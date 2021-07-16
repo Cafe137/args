@@ -12,13 +12,13 @@ parser.addCommand(
     })
 )
 
-it('should raise error when number is above maximum', () => {
-    const context = parser.parse(['weather', '--verbosity', '4'])
+it('should raise error when number is above maximum', async () => {
+    const context = await parser.parse(['weather', '--verbosity', '4'])
     expect(context).toBe('[verbosity] must be at most 3')
 })
 
-it('should allow number exactly the maximum', () => {
-    const context = parser.parse(['weather', '--verbosity', '3'])
+it('should allow number exactly the maximum', async () => {
+    const context = await parser.parse(['weather', '--verbosity', '3'])
     expect(context).toHaveProperty('options')
     expect(context.options).toHaveProperty('verbosity', 3)
 })

@@ -1,5 +1,5 @@
 const { createParser, Command } = require('../../index')
-const fs = require('fs')
+const { setupTestData } = require('../test-data')
 
 const parser = createParser()
 parser.addCommand(
@@ -9,23 +9,7 @@ parser.addCommand(
     })
 )
 
-function createDirectory(path) {
-    fs.mkdirSync(path, { recursive: true })
-}
-
-try {
-    fs.statSync('test-data')
-} catch {
-    createDirectory('test-data/alpha')
-    createDirectory('test-data/beta')
-    createDirectory('test-data/gamma/eta')
-    createDirectory('test-data/gamma/theta')
-    fs.writeFileSync('test-data/beta/delta.txt', '')
-    fs.writeFileSync('test-data/beta/zeta.txt', '')
-    fs.writeFileSync('test-data/gamma/epsilon.txt', '')
-    fs.writeFileSync('test-data/gamma/iota.txt', '')
-    fs.writeFileSync('test-data/gamma/theta/kappa.txt', '')
-}
+setupTestData()
 
 it('should complete directory', async () => {
     const suggestions = await parser.suggest('file test-d')

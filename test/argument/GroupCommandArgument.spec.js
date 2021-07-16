@@ -7,8 +7,8 @@ parser.addGroup(
     )
 )
 
-it('should allow passing arguments to group commands', () => {
-    const context = parser.parse(['identity', 'export', 'main'])
+it('should allow passing arguments to group commands', async () => {
+    const context = await parser.parse(['identity', 'export', 'main'])
     expect(context).toHaveProperty('group')
     expect(context).toHaveProperty('command')
     expect(context).toHaveProperty('arguments')

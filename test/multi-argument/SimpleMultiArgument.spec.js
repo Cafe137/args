@@ -15,15 +15,15 @@ parser.addGroup(
     )
 )
 
-it('should allow passing multiple arguments in top level command', () => {
-    const context = parser.parse(['copy', 'config.json', 'config.json.bkp'])
+it('should allow passing multiple arguments in top level command', async () => {
+    const context = await parser.parse(['copy', 'config.json', 'config.json.bkp'])
     expect(context).toHaveProperty('arguments')
     expect(context.arguments).toHaveProperty('source', 'config.json')
     expect(context.arguments).toHaveProperty('target', 'config.json.bkp')
 })
 
-it('should allow passing multiple arguments in group', () => {
-    const context = parser.parse(['color', 'rgb2hex', '128', '90', '40'])
+it('should allow passing multiple arguments in group', async () => {
+    const context = await parser.parse(['color', 'rgb2hex', '128', '90', '40'])
     expect(context).toHaveProperty('arguments')
     expect(context.arguments).toHaveProperty('r', 128)
     expect(context.arguments).toHaveProperty('g', 90)

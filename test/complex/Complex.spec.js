@@ -2,8 +2,8 @@ const { createSampleApp } = require('../factory')
 
 const parser = createSampleApp()
 
-it('should ping in verbose mode', () => {
-    const context = parser.parse(['ping', '-v'])
+it('should ping in verbose mode', async () => {
+    const context = await parser.parse(['ping', '-v'])
     expect(context).toHaveProperty('options')
     expect(context).toHaveProperty('command')
     expect(context).toHaveProperty('group', undefined)
@@ -14,8 +14,8 @@ it('should ping in verbose mode', () => {
     expect(context.options).toHaveProperty('config-dir', '/etc/cafe')
 })
 
-it('should upload with alias to custom host in quiet mode', () => {
-    const context = parser.parse(['file', 'up', 'data.tar.gz', '-n', '4000Unclassified', '-q', '--api-host', 'https://cdn.data.local:8080'])
+it('should upload with alias to custom host in quiet mode', async () => {
+    const context = await parser.parse(['file', 'up', 'data.tar.gz', '-n', '4000Unclassified', '-q', '--api-host', 'https://cdn.data.local:8080'])
     expect(context).toHaveProperty('command')
     expect(context).toHaveProperty('group')
     expect(context).toHaveProperty('options')

@@ -7,7 +7,7 @@ parser.addGroup(
     )
 )
 
-it('should raise errors when not passing required argument to group commands', () => {
-    const context = parser.parse(['identity', 'export'])
+it('should raise errors when not passing required argument to group commands', async () => {
+    const context = await parser.parse(['identity', 'export'])
     expect(context).toBe('Required argument [argument] is not provided')
 })

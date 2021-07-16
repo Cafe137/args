@@ -30,9 +30,9 @@ parser.addGroup(
     )
 )
 
-it('should have all variations on sourcemap', () => {
+it('should have all variations on sourcemap', async () => {
     process.env.RSS_CONFIG_PATH = '/home/user/rss'
-    const context = parser.parse(['rss', 'list', '--active'])
+    const context = await parser.parse(['rss', 'list', '--active'])
     expect(context).toHaveProperty('sourcemap')
     expect(context.sourcemap).toHaveProperty('rss-config-path', 'env')
     expect(context.sourcemap).toHaveProperty('active', 'explicit')

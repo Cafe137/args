@@ -1,18 +1,20 @@
-const BASH_TEMPLATE = `_$1() {
-    local IFS=$'\\n'
-    local cur prev nb_colon
-    _get_comp_words_by_ref -n : cur prev
-    nb_colon=$(grep -o ":" <<< "$COMP_LINE" | wc -l)
-    COMPREPLY=( $(compgen -W '$($2 --compbash --compgen "\${COMP_LINE}")' -- "$cur") )
-    __ltrim_colon_completions "$cur"
-}
-complete -o nospace -F _$1 $2`
-
-const ZSH_TEMPLATE = `_$1() {
-    local IFS=$'\\n'
-    compadd -Q -S '' -- \`$2 --compzsh --compgen "\${BUFFER}"\`
-}
-compdef _$1 $2`
+const BASH_ZSH_TEMPLATE = `if type compdef &>/dev/null; then
+    _$1() {
+        local IFS=$'\\n'
+        compadd -Q -S '' -- \`$2 --compzsh --compgen "\${BUFFER}"\`
+    }
+    compdef _$1 $2
+elif type complete &>/dev/null; then
+    _$1() {
+        local IFS=$'\\n'
+        local cur prev nb_colon
+        _get_comp_words_by_ref -n : cur prev
+        nb_colon=$(grep -o ":" <<< "$COMP_LINE" | wc -l)
+        COMPREPLY=( $(compgen -W '$($2 --compbash --compgen "\${COMP_LINE}")' -- "$cur") )
+        __ltrim_colon_completions "$cur"
+    }
+    complete -o nospace -F _$1 $2
+fi`
 
 const FISH_TEMPLATE = `function _$1
     $2 --compfish --compgen (commandline -pb)
@@ -21,12 +23,12 @@ complete -f -c $2 -a '(_$1)'`
 
 function generateBashCompletion(command) {
     const name = command.replace(/-/g, '_')
-    return BASH_TEMPLATE.replace(/\$1/g, name).replace(/\$2/g, command)
+    return BASH_ZSH_TEMPLATE.replace(/\$1/g, name).replace(/\$2/g, command)
 }
 
 function generateZshCompletion(command) {
     const name = command.replace(/-/g, '_')
-    return ZSH_TEMPLATE.replace(/\$1/g, name).replace(/\$2/g, command)
+    return BASH_ZSH_TEMPLATE.replace(/\$1/g, name).replace(/\$2/g, command)
 }
 
 function generateFishCompletion(command) {
@@ -60,19 +62,19 @@ function detectShell(string) {
     return null
 }
 
-function getShellPath(string) {
+function getShellPaths(string) {
     const path = require('path')
     const os = require('os')
     if (string === 'fish') {
-        return path.join(os.homedir(), '.config/fish/config.fish')
+        return [path.join(os.homedir(), '.config/fish/config.fish')]
     }
     if (string === 'zsh') {
-        return path.join(os.homedir(), '.zshrc')
+        return [path.join(os.homedir(), '.zshrc')]
     }
     if (string === 'bash') {
-        return path.join(os.homedir(), '.bash_profile')
+        return [path.join(os.homedir(), '.bashrc'), path.join(os.homedir(), '.bash_profile')]
     }
     return null
 }
 
-module.exports = { detectShell, getShellPath, generateCompletion }
+module.exports = { detectShell, getShellPaths, generateCompletion }

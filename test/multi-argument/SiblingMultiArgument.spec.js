@@ -22,8 +22,8 @@ parser.addGroup(
     )
 )
 
-it('should combine arguments from self and sibling', () => {
-    const context = parser.parse(['github', 'project', 'init', '~/Projects/MyAwesomeProject', 'react-sample-app'])
+it('should combine arguments from self and sibling', async () => {
+    const context = await parser.parse(['github', 'project', 'init', '~/Projects/MyAwesomeProject', 'react-sample-app'])
     expect(context).toHaveProperty('arguments')
     expect(context).toHaveProperty('sibling')
     expect(context.sibling).toHaveProperty('arguments')

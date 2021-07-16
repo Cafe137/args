@@ -14,7 +14,7 @@ const {
 const { suggest } = require('./src/suggest')
 const { tokenize } = require('./src/tokenize')
 const { Group, Command } = require('./src/type')
-const { detectShell, generateCompletion, getShellPath } = require('./src/shell')
+const { detectShell, generateCompletion, getShellPaths } = require('./src/shell')
 
 function findOptionTargets(context, option) {
     if (option.global) {
@@ -89,7 +89,7 @@ function createParser(options) {
         suggest: (line, offset = 0, trailing = '') => {
             return suggest(line, offset, [...groups, ...commands], globalOptions, pathResolver, trailing)
         },
-        parse: argv => {
+        parse: async argv => {
             const context = {
                 options: {},
                 arguments: {},
@@ -102,7 +102,7 @@ function createParser(options) {
             for (const option of globalOptions) {
                 if (isOptionPassed(argv, option)) {
                     if (option.handler) {
-                        option.handler(context)
+                        await option.handler(context)
                         return { exitReason: option.key }
                     }
                     if (option.key === 'help') {
@@ -247,4 +247,4 @@ function createParser(options) {
     }
 }
 
-module.exports = { tokenize, createParser, Group, Command, getShellPath, generateCompletion, detectShell }
+module.exports = { tokenize, createParser, Group, Command, getShellPaths, generateCompletion, detectShell }

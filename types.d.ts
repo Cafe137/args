@@ -78,7 +78,7 @@ declare module 'cafe-args' {
 
     export interface Parser {
         suggest(line: string, offset: number, trailing: string): Promise<string[]>
-        parse(argv: string[]): string | Context
+        parse(argv: string[]): Promise<string | Context>
         addGroup(group: Group): void
         addCommand(command: Command): void
         addGlobalOption(option: Argument): void
@@ -98,7 +98,7 @@ declare module 'cafe-args' {
 
     export function detectShell(string: string): Shell | null
 
-    export function getShellPath(shell: Shell): string
+    export function getShellPaths(shell: Shell): string[]
 
     export function generateCompletion(command: string, shell: Shell): string
 

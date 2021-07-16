@@ -16,8 +16,8 @@ parser.addCommand(
     })
 )
 
-it('should parse both required options', () => {
-    const context = parser.parse(['post-json', '--data', '{"hello":"world"}', '--url', 'http://dev.local'])
+it('should parse both required options', async () => {
+    const context = await parser.parse(['post-json', '--data', '{"hello":"world"}', '--url', 'http://dev.local'])
     expect(context).toHaveProperty('options')
     expect(context.options).toHaveProperty('data', '{"hello":"world"}')
     expect(context).toHaveProperty('sibling')
@@ -25,12 +25,12 @@ it('should parse both required options', () => {
     expect(context.sibling.options).toHaveProperty('url', 'http://dev.local')
 })
 
-it('should raise error for missing required option on self', () => {
-    const context = parser.parse(['post-json', '--url', 'http://dev.local'])
+it('should raise error for missing required option on self', async () => {
+    const context = await parser.parse(['post-json', '--url', 'http://dev.local'])
     expect(context).toBe('Required option not provided: data')
 })
 
-it('should raise error for missing required option on sibling', () => {
-    const context = parser.parse(['post-json', '--data', '{"hello":"world"}'])
+it('should raise error for missing required option on sibling', async () => {
+    const context = await parser.parse(['post-json', '--data', '{"hello":"world"}'])
     expect(context).toBe('Required option not provided: url')
 })

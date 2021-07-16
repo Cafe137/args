@@ -7,17 +7,17 @@ parser.addCommand(
         .withOption({ key: 'key-phrase', description: 'Human readable phrase to construct key from', required: true, conflicts: 'key' })
 )
 
-it('should get default value from key when key-phrase is not given', () => {
-    const context = parser.parse(['encrypt'])
+it('should get default value from key when key-phrase is not given', async () => {
+    const context = await parser.parse(['encrypt'])
     expect(context).toHaveProperty('options.key', 'cafebabe')
 })
 
-it('should get value from key-phrase when given', () => {
-    const context = parser.parse(['encrypt', '--key-phrase', 'Dead Beef'])
+it('should get value from key-phrase when given', async () => {
+    const context = await parser.parse(['encrypt', '--key-phrase', 'Dead Beef'])
     expect(context).toHaveProperty('options.key-phrase', 'Dead Beef')
 })
 
-it('should get value from key when given', () => {
-    const context = parser.parse(['encrypt', '--key', '0xDEadBEef'])
+it('should get value from key when given', async () => {
+    const context = await parser.parse(['encrypt', '--key', '0xDEadBEef'])
     expect(context).toHaveProperty('options.key', 'deadbeef')
 })

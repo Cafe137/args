@@ -9,8 +9,8 @@ parser.addGroup(
     )
 )
 
-it('should allow argument after boolean and not consume it', () => {
-    const context = parser.parse(['group', 'command', '--boolean', 'argument'])
+it('should allow argument after boolean and not consume it', async () => {
+    const context = await parser.parse(['group', 'command', '--boolean', 'argument'])
     expect(context).toHaveProperty('group')
     expect(context).toHaveProperty('command')
     expect(context).toHaveProperty('options')
