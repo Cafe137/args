@@ -1,11 +1,11 @@
 declare module 'cafe-args' {
-    export interface Argument {
+    export interface Argument<T = unknown> {
         key: string
         description: string
-        type?: string
+        type?: 'string' | 'boolean' | 'number' | 'bigint' | 'hex-string'
         required?: boolean | { when: string } | { unless: string }
         conflicts?: string
-        default?: unknown
+        default?: T
         defaultDescription?: string
         alias?: string
         envKey?: string
@@ -28,7 +28,7 @@ declare module 'cafe-args' {
         arguments: Argument[]
         alias?: string
         sibling?: string
-        meta?: any
+        meta?: Record<string, any>
     }
 
     export interface ParsedCommand {
@@ -43,10 +43,10 @@ declare module 'cafe-args' {
     export interface Context {
         exitReason?: string
         command: CommandDefinition
-        sibling?: ParsedCommand
         options: Record<string, unknown>
         arguments: Record<string, unknown>
         sourcemap: Record<string, 'default' | 'env' | 'explicit'>
+        sibling?: ParsedCommand
     }
 
     export class Command {
