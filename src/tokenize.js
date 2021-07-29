@@ -9,6 +9,9 @@ function tokenize(string, offset = 0) {
             token = ''
         } else if (quotes && character === quotes && previous !== '\\') {
             quotes = false
+            if (token === '') {
+                argv.push('')
+            }
         } else if (!quotes && ['"', "'"].includes(character) && previous !== '\\') {
             quotes = character
         } else if (character !== '\\' && (token || character !== ' ' || quotes)) {

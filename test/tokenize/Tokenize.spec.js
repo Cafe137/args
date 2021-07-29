@@ -59,3 +59,43 @@ it('should return empty array when input is empty', () => {
     const { argv } = tokenize('')
     expect(argv).toStrictEqual([])
 })
+
+it('should parse empty strings with quotes', () => {
+    const { argv } = tokenize('""')
+    expect(argv).toStrictEqual([''])
+})
+
+it('should parse empty strings with apostrophes', () => {
+    const { argv } = tokenize("''")
+    expect(argv).toStrictEqual([''])
+})
+
+it('should parse empty strings at the end with quotes', () => {
+    const { argv } = tokenize('--string ""')
+    expect(argv).toStrictEqual(['--string', ''])
+})
+
+it('should parse empty strings at the end with apostrophes', () => {
+    const { argv } = tokenize("--string ''")
+    expect(argv).toStrictEqual(['--string', ''])
+})
+
+it('should parse empty strings between tokens with quotes', () => {
+    const { argv } = tokenize('--string "" --quiet')
+    expect(argv).toStrictEqual(['--string', '', '--quiet'])
+})
+
+it('should parse empty strings between tokens with apostrophes', () => {
+    const { argv } = tokenize("--string '' --quiet")
+    expect(argv).toStrictEqual(['--string', '', '--quiet'])
+})
+
+it('should parse empty strings with quotes with trailing space', () => {
+    const { argv } = tokenize('--string "" ')
+    expect(argv).toStrictEqual(['--string', ''])
+})
+
+it('should parse empty strings with apostrophes with trailing space', () => {
+    const { argv } = tokenize("--string '' ")
+    expect(argv).toStrictEqual(['--string', ''])
+})
