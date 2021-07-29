@@ -228,12 +228,14 @@ function createParser(options) {
                 if (option.conflicts && context.options[option.key] && context.options[option.conflicts]) {
                     return handleError(context, option.key + ' and ' + option.conflicts + ' are incompatible, please only specify one.')
                 }
-                if (option.required) {
+                if (option.required && !option.noErrors) {
                     for (const target of targets) {
                         if (
-                            target[option.key] === undefined &&
-                            !option.noErrors &&
-                            (!option.conflicts || target[option.conflicts] === undefined) &&
+                            (target[option.key] === undefined ||
+                                (context.sourcemap[option.key] === 'default' &&
+                                    target[option.required.when] &&
+                                    context.sourcemap[option.required.when] !== 'default')) &&
+                            (!option.conflicts || !target[option.conflicts]) &&
                             (!option.required.when || target[option.required.when]) &&
                             (!option.required.unless || !target[option.required.unless])
                         ) {
