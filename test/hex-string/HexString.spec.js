@@ -30,5 +30,5 @@ it('should parse hexstring with 0x prefix and uppercase parts', async () => {
 
 it('should not parse 0x only', async () => {
     const context = await parser.parse(['address', '0x'])
-    expect(context).toBe('Expected hex string for address, got 0x')
+    expect(context).toBe('[address] must not be empty')
 })

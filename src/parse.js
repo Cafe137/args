@@ -61,6 +61,9 @@ function parseBigInt(option, rawValue) {
 }
 
 function validateStringLength(option, string) {
+    if (option.minimumLength === undefined && string.length === 0) {
+        return Error('[' + option.key + '] must not be empty')
+    }
     if (option.length && string.length !== option.length) {
         return Error('[' + option.key + '] must have length of ' + option.length + ' characters')
     }
@@ -75,7 +78,7 @@ function validateStringLength(option, string) {
 function parseHexString(option, rawValue) {
     const lowercase = rawValue.toLowerCase()
     const hexString = lowercase.startsWith('0x') ? lowercase.slice(2) : lowercase
-    if (!/^[a-f0-9]+$/.test(hexString)) {
+    if (!/^[a-f0-9]+$/.test(hexString) && hexString.length > 0) {
         return Error('Expected hex string for ' + option.key + ', got ' + rawValue)
     }
     const lengthError = validateStringLength(option, hexString)
