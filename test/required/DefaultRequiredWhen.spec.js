@@ -25,25 +25,25 @@ it('should have both defaults', async () => {
     expect(context.options).toHaveProperty('host', 'localhost')
 })
 
-it('should have allow passing both options', async () => {
+it('should allow passing both options', async () => {
     const context = await parser.parse(['ping', '--protocol', 'tcp', '--host', '192.168.1.1'])
     expect(context.options).toHaveProperty('protocol', 'tcp')
     expect(context.options).toHaveProperty('host', '192.168.1.1')
 })
 
-it('should have allow passing both options when both options are explicit defaults', async () => {
+it('should allow passing both options when both options are explicit defaults', async () => {
     const context = await parser.parse(['ping', '--protocol', 'http', '--host', 'localhost'])
     expect(context.options).toHaveProperty('protocol', 'http')
     expect(context.options).toHaveProperty('host', 'localhost')
 })
 
-it('should have allow passing both options when option 1 is explicit default', async () => {
+it('should allow passing both options when option 1 is explicit default', async () => {
     const context = await parser.parse(['ping', '--protocol', 'http', '--host', '192.168.1.1'])
     expect(context.options).toHaveProperty('protocol', 'http')
     expect(context.options).toHaveProperty('host', '192.168.1.1')
 })
 
-it('should have allow passing both options when option 2 is explicit default', async () => {
+it('should allow passing both options when option 2 is explicit default', async () => {
     const context = await parser.parse(['ping', '--protocol', 'tcp', '--host', 'localhost'])
     expect(context.options).toHaveProperty('protocol', 'tcp')
     expect(context.options).toHaveProperty('host', 'localhost')
