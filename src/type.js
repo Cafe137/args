@@ -50,6 +50,10 @@ function Command(key, description, settings) {
         this.arguments.push(x)
         return this
     }
+    this.withFn = function (x) {
+        this.fn = x
+        return this
+    }
 }
 
 module.exports = {

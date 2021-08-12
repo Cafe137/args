@@ -1,4 +1,8 @@
 declare module 'cafe-args' {
+    export type CafeFnContext = { options: Record<string, unknown>; arguments: Record<string, unknown> }
+
+    export type CafeFn = (context: CafeFnContext) => Promise<void>
+
     export interface Argument<T = unknown> {
         key: string
         description: string
@@ -28,7 +32,7 @@ declare module 'cafe-args' {
         arguments: Argument[]
         alias?: string
         sibling?: string
-        meta?: Record<string, any>
+        fn?: CafeFn
     }
 
     export interface ParsedCommand {
@@ -45,6 +49,7 @@ declare module 'cafe-args' {
         command: CommandDefinition
         options: Record<string, unknown>
         arguments: Record<string, unknown>
+        fn?: CafeFn
         sourcemap: Record<string, 'default' | 'env' | 'explicit'>
         sibling?: ParsedCommand
     }
@@ -60,7 +65,7 @@ declare module 'cafe-args' {
         )
         withOption(option: Argument): Command
         withPositional(positional: Argument): Command
-        meta?: any
+        withFn(fn: CafeFn)
     }
 
     export class Group {

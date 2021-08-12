@@ -125,6 +125,7 @@ function createParser(options) {
                     return handleError(context, 'Not a valid command in group [' + context.group.key + ']: ' + argv[depth])
                 }
             }
+            context.fn = () => context.command.fn(context)
             const sibling = context.command.sibling ? findCommandByFullPath(groups, commands, context.command.sibling) : null
             if (context.command.sibling && !sibling) {
                 return handleError(context, 'Expected sibling command not found!')
