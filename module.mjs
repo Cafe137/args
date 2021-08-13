@@ -1,4 +1,4 @@
-import c from '.'
+import c from './index.js'
 
 export const createParser = c.createParser
 export const Group = c.Group

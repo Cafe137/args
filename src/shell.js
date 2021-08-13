@@ -1,3 +1,5 @@
+const { nodeModuleRequire } = require('./node-module-require')
+
 const BASH_ZSH_TEMPLATE = `if type compdef &>/dev/null; then
     _$1() {
         local IFS=$'\\n'
@@ -63,8 +65,8 @@ function detectShell(string) {
 }
 
 function getShellPaths(string) {
-    const path = require('path')
-    const os = require('os')
+    const path = nodeModuleRequire('path')
+    const os = nodeModuleRequire('os')
     if (string === 'fish') {
         return [path.join(os.homedir(), '.config/fish/config.fish')]
     }

@@ -1,3 +1,5 @@
+const { nodeModuleRequire } = require('./node-module-require')
+
 function filterMatches(entries, start) {
     return entries.filter(entry => entry.startsWith(start))
 }
@@ -11,7 +13,7 @@ function parsePath(word) {
 }
 
 async function completePath(word) {
-    const fs = require('fs')
+    const fs = nodeModuleRequire('fs')
     const { dir, base } = parsePath(word)
     const entries = await fs.promises.readdir(dir || '.').catch(x => [])
     const matches = filterMatches(entries, base)

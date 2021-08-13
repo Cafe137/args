@@ -3,6 +3,8 @@ declare module 'cafe-args' {
 
     export type CafeFn = (context: CafeFnContext) => Promise<void>
 
+    export type PreparedCafeFn = () => Promise<void>
+
     export interface Argument<T = unknown> {
         key: string
         description: string
@@ -49,7 +51,7 @@ declare module 'cafe-args' {
         command: CommandDefinition
         options: Record<string, unknown>
         arguments: Record<string, unknown>
-        fn?: CafeFn
+        fn?: PreparedCafeFn
         sourcemap: Record<string, 'default' | 'env' | 'explicit'>
         sibling?: ParsedCommand
     }
@@ -65,7 +67,7 @@ declare module 'cafe-args' {
         )
         withOption(option: Argument): Command
         withPositional(positional: Argument): Command
-        withFn(fn: CafeFn)
+        withFn(fn: CafeFn): Command
     }
 
     export class Group {
@@ -97,7 +99,14 @@ declare module 'cafe-args' {
 
     export function createParser(options?: ParserOptions): Parser
 
-    export function tokenize(string: string, offset: number): string[]
+    export interface TokenizeContext {
+        argv: string[]
+        quotes: false | string
+        token: string
+        opensNext: boolean
+    }
+
+    export function tokenize(string: string, offset: number): TokenizeContext
 
     export type Shell = 'fish' | 'zsh' | 'bash'
 
