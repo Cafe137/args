@@ -1,6 +1,8 @@
 function nodeModuleRequire(module) {
     if (require) {
-        return require(module)
+        try {
+            return require(module)
+        } catch {}
     }
 }
 
